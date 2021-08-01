@@ -13,6 +13,9 @@ cmake_policy(SET CMP0075 NEW)
 set(SRC_SOURCES
   main.cpp
   main.hpp
+
+  saveBuf.hpp
+  saveBuf.cpp
   )
 
 

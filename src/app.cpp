@@ -9,8 +9,9 @@ App::App()
 
 bool App::OnInit()
 {
-    std::cout << "Init!\n";
     _frame = new Main();
     _frame->Show();
+
+
     return true;
 }

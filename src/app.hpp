@@ -2,6 +2,7 @@
 #define CATOR_APP_HPP
 
 #include <wx-3.0/wx/wx.h>
+#include <wx-3.0/wx/menu.h>
 
 #include "main.hpp"
 
