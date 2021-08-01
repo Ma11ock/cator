@@ -77,6 +77,11 @@ target_compile_features(${BINARY} PUBLIC c_std_99)
 
 target_link_libraries(${BINARY_FINAL} PUBLIC ${BINARY})
 
+add_custom_target(run
+  COMMAND ${BINARY_FINAL}
+  DEPENDS ${BINARY_FINAL}
+  WORKING_DIRECTORY ${CMAKE_PROJECT_DIR})
+
 install(TARGETS ${BINARY}
 
   DESTINATION bin/
