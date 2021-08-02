@@ -71,4 +71,17 @@ namespace cator
         return std::snprintf(result, strlen, formatString.c_str(),
                              cator::cast::cast(std::forward<Args>(args))...);
     }
+
+    /* Returns true if the string starts with prefix, false if not. */
+    inline bool startsWith(std::string_view str, std::string_view prefix)
+    {
+        return str.rfind(prefix, 0) == 0;
+    }
+
+    inline std::string tail(std::string_view source, std::size_t length)
+    {
+        if(length >= source.size())
+            return std::string(source);
+        return std::string(source.substr(source.size() - length));
+    }
 }
