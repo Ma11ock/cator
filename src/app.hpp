@@ -14,6 +14,7 @@ public:
     App();
     ~App() = default;
     bool OnInit();
+    int FilterEvent(wxEvent &event);
 };
 
 #endif /* CATOR_APP_HPP */

@@ -4,6 +4,10 @@
 #include <wx-3.0/wx/wfstream.h>
 
 #include <filesystem>
+#include <string>
+#include "util.hpp"
+
+using namespace std::string_literals;
 
 namespace fs = std::filesystem;
 
@@ -24,6 +28,10 @@ EVT_MENU(ID_ForwardSearch, Main::ForwardSearch)
 
 EVT_MENU(ID_Describe, Main::Describe)
 EVT_MENU(ID_License, Main::ShowLicense)
+
+EVT_MENU(ID_Copy, Main::Copy)
+EVT_MENU(ID_Paste, Main::Paste)
+EVT_MENU(ID_Cut, Main::Cut)
 
 EVT_TOOL(wxID_HELP, Main::OnHelp)
 EVT_SAVBUF(Main::OnBufferSave)
@@ -85,6 +93,14 @@ Main::Main()
     SetToolBar(toolBar);
 
     _textArea = new wxRichTextCtrl(this, wxID_ANY);
+
+    _statusBar = new wxStatusBar(this);
+    _statusBar->SetFieldsCount(2);
+    _statusBar->SetStatusText("(Unnamed)", 0);
+    _statusBar->SetStatusText("Col 0 Row 0", 1);
+    SetStatusBar(_statusBar);
+
+    _textArea->Bind(wxEVT_RICHTEXT_CHARACTER, &Main::KeyDown, this);
 }
 
 void Main::OnNew(wxCommandEvent &event)
@@ -147,6 +163,7 @@ void Main::VisitNewFile(wxCommandEvent &event)
         return;
     }
 
+    _statusBar->SetStatusText(openFileDialog.GetPath(), 0);
 }
 
 void Main::Undo(wxCommandEvent &event)
@@ -862,7 +879,26 @@ Public License instead of this License.  But first, please read
 )LICENSE");
 }
 
-Main::~Main()
+void Main::Copy(wxCommandEvent &event)
 {
-    
+    _textArea->Copy();
 }
+
+void Main::Paste(wxCommandEvent &event)
+{
+    _textArea->Paste();
+}
+
+void Main::Cut(wxCommandEvent &event)
+{
+    _textArea->Cut();
+}
+
+void Main::KeyDown(wxRichTextEvent &event)
+{
+    long x;
+    long y;
+    _textArea->PositionToXY(event.GetPosition(), &x, &y);
+    _statusBar->SetStatusText(cator::sprintf("Col %ld Row %ld", x, y), 1);
+}
+

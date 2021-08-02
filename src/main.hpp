@@ -3,6 +3,9 @@
 
 #include <wx-3.0/wx/wx.h>
 #include <wx-3.0/wx/richtext/richtextctrl.h>
+#include <wx-3.0/wx/event.h>
+
+
 
 #include "saveBuf.hpp"
 
@@ -12,6 +15,8 @@ private:
 
     wxMenu *_bufferMenu;
     wxRichTextCtrl *_textArea;
+    wxStatusBar *_statusBar;
+    wxRichTextEvent *_rtEvent;
 
     void OnNew(wxCommandEvent &event);
     void OnQuit(wxCommandEvent &event);
@@ -27,9 +32,14 @@ private:
     void ForwardSearch(wxCommandEvent &event);
     void Describe(wxCommandEvent &event);
     void ShowLicense(wxCommandEvent &event);
+    void Copy(wxCommandEvent &event);
+    void Paste(wxCommandEvent &event);
+    void Cut(wxCommandEvent &event);
 public:
     Main();
-    ~Main();
+    ~Main() = default;
+
+    void KeyDown(wxRichTextEvent &event);
 
     DECLARE_EVENT_TABLE()
 };
