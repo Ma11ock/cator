@@ -26,6 +26,7 @@ private:
     void ToggleSystemFont(wxCommandEvent &event);
     void ForwardSearch(wxCommandEvent &event);
     void Describe(wxCommandEvent &event);
+    void ShowLicense(wxCommandEvent &event);
 public:
     Main();
     ~Main();
@@ -43,7 +44,8 @@ enum
     ID_Redo,
     ID_UseSystemFontToggle,
     ID_ForwardSearch,
-    ID_Describe
+    ID_Describe,
+    ID_License
 };
 
 #endif /* CATOR_MAIN_HPP */
