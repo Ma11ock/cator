@@ -118,12 +118,12 @@ void Main::VisitNewFile(wxCommandEvent &event)
 
 void Main::Undo(wxCommandEvent &event)
 {
-    wxMessageBox("Undo.");
+    _textArea->Undo();
 }
 
 void Main::Redo(wxCommandEvent &event)
 {
-    wxMessageBox("Redo.");
+    _textArea->Redo();
 }
 
 
