@@ -2,6 +2,7 @@
 #define CATOR_MAIN_HPP
 
 #include <wx-3.0/wx/wx.h>
+#include <wx-3.0/wx/richtext/richtextctrl.h>
 
 #include "saveBuf.hpp"
 
@@ -10,6 +11,7 @@ class Main : public wxFrame
 private:
 
     wxMenu *_bufferMenu;
+    wxRichTextCtrl *_textArea;
 
     void OnNew(wxCommandEvent &event);
     void OnQuit(wxCommandEvent &event);

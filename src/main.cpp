@@ -1,6 +1,7 @@
 #include "main.hpp"
 
 #include <wx-3.0/wx/artprov.h>
+#include <wx-3.0/wx/wfstream.h>
 
 BEGIN_EVENT_TABLE(Main, wxFrame)
 EVT_MENU(wxID_NEW, Main::OnNew)
@@ -56,6 +57,8 @@ Main::Main()
     help->Append(ID_Describe, wxT("&Describe"));
     menuBar->Append(help, wxT("&Help"));
 
+    _textArea = new wxRichTextCtrl(this, wxID_ANY);
+
     SetMenuBar(menuBar);
 }
 
@@ -99,7 +102,18 @@ void Main::InsertFile(wxCommandEvent &event)
 
 void Main::VisitNewFile(wxCommandEvent &event)
 {
-    wxMessageBox("Visit file.");
+    wxFileDialog openFileDialog(this, wxT("Choose a file"), "", "",
+                                "*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+    if(openFileDialog.ShowModal() == wxID_CANCEL)
+        return;
+
+    if(!_textArea->LoadFile(openFileDialog.GetPath()))
+    {
+        wxLogError("Cannot open file \"%s\"", openFileDialog.GetPath());
+        return;
+    }
+
 }
 
 void Main::Undo(wxCommandEvent &event)
