@@ -84,7 +84,7 @@ void Main::OnAbout(wxCommandEvent &event)
 
 void Main::OnBufferSave(SaveBufferEvent &event)
 {
-    wxMessageBox("It works!");
+    _textArea->SaveFile();
 }
 
 void Main::OnFireEvent(wxCommandEvent &event)
@@ -110,6 +110,7 @@ void Main::VisitNewFile(wxCommandEvent &event)
 
     if(!_textArea->LoadFile(openFileDialog.GetPath()))
     {
+        _textArea->SetFilename(openFileDialog.GetPath());
         wxLogError("Cannot open file \"%s\"", openFileDialog.GetPath());
         return;
     }
