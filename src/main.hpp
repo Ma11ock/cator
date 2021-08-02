@@ -35,6 +35,8 @@ private:
     void Copy(wxCommandEvent &event);
     void Paste(wxCommandEvent &event);
     void Cut(wxCommandEvent &event);
+    void Open(wxCommandEvent &event);
+    void OpenDir(wxCommandEvent &event);
 public:
     Main();
     ~Main() = default;

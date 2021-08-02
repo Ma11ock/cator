@@ -7,6 +7,14 @@
 #include <string>
 #include "util.hpp"
 
+#include <cstdlib>
+#include <cstdio>
+
+extern "C"
+{
+#include <linux/limits.h>
+}
+
 using namespace std::string_literals;
 
 namespace fs = std::filesystem;
@@ -32,6 +40,9 @@ EVT_MENU(ID_License, Main::ShowLicense)
 EVT_MENU(ID_Copy, Main::Copy)
 EVT_MENU(ID_Paste, Main::Paste)
 EVT_MENU(ID_Cut, Main::Cut)
+
+EVT_MENU(ID_Open, Main::Open)
+EVT_MENU(ID_OpenDir, Main::OpenDir)
 
 EVT_TOOL(wxID_HELP, Main::OnHelp)
 EVT_SAVBUF(Main::OnBufferSave)
@@ -101,6 +112,13 @@ Main::Main()
     SetStatusBar(_statusBar);
 
     _textArea->Bind(wxEVT_RICHTEXT_CHARACTER, &Main::KeyDown, this);
+    _textArea->Bind(wxEVT_RICHTEXT_DELETE, &Main::KeyDown, this);
+    _textArea->Bind(wxEVT_RICHTEXT_RETURN, &Main::KeyDown, this);
+    _textArea->Bind(wxEVT_RICHTEXT_LEFT_CLICK, &Main::KeyDown, this);
+    _textArea->Bind(wxEVT_RICHTEXT_CONTENT_INSERTED, &Main::KeyDown, this);
+    _textArea->Bind(wxEVT_RICHTEXT_CONTENT_DELETED, &Main::KeyDown, this);
+    _textArea->Bind(wxEVT_RICHTEXT_BUFFER_RESET, &Main::KeyDown, this);
+    _textArea->Bind(wxEVT_RICHTEXT_SELECTION_CHANGED, &Main::KeyDown, this);
 }
 
 void Main::OnNew(wxCommandEvent &event)
@@ -894,6 +912,8 @@ void Main::Cut(wxCommandEvent &event)
     _textArea->Cut();
 }
 
+
+
 void Main::KeyDown(wxRichTextEvent &event)
 {
     long x;
@@ -902,3 +922,55 @@ void Main::KeyDown(wxRichTextEvent &event)
     _statusBar->SetStatusText(cator::sprintf("Col %ld Row %ld", x, y), 1);
 }
 
+
+void Main::Open(wxCommandEvent &event)
+{
+    wxFileDialog openFileDialog(this, wxT("Choose a file"), "", "",
+                                "*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+    if(openFileDialog.ShowModal() == wxID_CANCEL)
+        return;
+
+    if(!fs::exists(openFileDialog.GetPath().ToStdString()))
+    {
+        wxFile tmp;
+        tmp.Create(openFileDialog.GetPath());
+        tmp.Close();
+    }
+
+    if(!_textArea->LoadFile(openFileDialog.GetPath()))
+    {
+        _textArea->SetFilename(openFileDialog.GetPath());
+        wxLogError("Cannot open file \"%s\"", openFileDialog.GetPath());
+        return;
+    }
+
+    _statusBar->SetStatusText(openFileDialog.GetPath(), 0);
+}
+
+void Main::OpenDir(wxCommandEvent &event)
+{
+    wxDirDialog dlg(this, "Choose a directory to edit", "",
+        wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST | wxDD_CHANGE_DIR);
+
+    if(dlg.ShowModal() == wxID_CANCEL)
+        return;
+
+    char buf[PATH_MAX];
+    FILE *ls = popen(cator::sprintf("/bin/ls %s", dlg.GetPath().ToStdString()).c_str(),
+        "r");
+    if(ls == nullptr)
+    {
+        std::cerr << "Could not ls the file " << dlg.GetPath().ToStdString()
+                  << '\n';
+        return;
+    }
+
+    _textArea->SetFilename("");
+    _textArea->Clear();
+
+    while(fgets(buf, sizeof(buf), ls) != nullptr)
+    {
+        _textArea->WriteText(wxString(buf));
+    }
+}
