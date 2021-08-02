@@ -3,6 +3,10 @@
 #include <wx-3.0/wx/artprov.h>
 #include <wx-3.0/wx/wfstream.h>
 
+#include <filesystem>
+
+namespace fs = std::filesystem;
+
 BEGIN_EVENT_TABLE(Main, wxFrame)
 EVT_MENU(wxID_NEW, Main::OnNew)
 EVT_MENU(wxID_EXIT, Main::OnQuit)
@@ -108,6 +112,13 @@ void Main::VisitNewFile(wxCommandEvent &event)
     if(openFileDialog.ShowModal() == wxID_CANCEL)
         return;
 
+    /* If the file does exist, create it. */
+    if(!fs::exists(openFileDialog.GetPath().ToStdString()))
+    {
+        wxFile tmp;
+        tmp.Create(openFileDialog.GetPath());
+        tmp.Close();
+    }
     if(!_textArea->LoadFile(openFileDialog.GetPath()))
     {
         _textArea->SetFilename(openFileDialog.GetPath());
