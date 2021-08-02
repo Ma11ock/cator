@@ -4,19 +4,19 @@
 #include <wx-3.0/wx/wx.h>
 #include <wx-3.0/wx/richtext/richtextctrl.h>
 #include <wx-3.0/wx/event.h>
-
-
+#include <string>
+#include <vector>
 
 #include "saveBuf.hpp"
 
 class Main : public wxFrame
 {
 private:
-
+    std::vector<std::string> _dirFileList;
     wxMenu *_bufferMenu;
     wxRichTextCtrl *_textArea;
     wxStatusBar *_statusBar;
-    wxRichTextEvent *_rtEvent;
+    bool _isDired;
 
     void OnNew(wxCommandEvent &event);
     void OnQuit(wxCommandEvent &event);

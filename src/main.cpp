@@ -2,6 +2,7 @@
 
 #include <wx-3.0/wx/artprov.h>
 #include <wx-3.0/wx/wfstream.h>
+#include <cstring>
 
 #include <filesystem>
 #include <string>
@@ -13,6 +14,7 @@
 extern "C"
 {
 #include <linux/limits.h>
+#include <sys/stat.h>
 }
 
 using namespace std::string_literals;
@@ -119,6 +121,8 @@ Main::Main()
     _textArea->Bind(wxEVT_RICHTEXT_CONTENT_DELETED, &Main::KeyDown, this);
     _textArea->Bind(wxEVT_RICHTEXT_BUFFER_RESET, &Main::KeyDown, this);
     _textArea->Bind(wxEVT_RICHTEXT_SELECTION_CHANGED, &Main::KeyDown, this);
+
+    _isDired = false;
 }
 
 void Main::OnNew(wxCommandEvent &event)
@@ -138,12 +142,39 @@ void Main::OnHelp(wxCommandEvent &event)
 
 void Main::OnAbout(wxCommandEvent &event)
 {
-    wxMessageBox("MainWindow::About");
+    wxMessageBox(R"ABOUT(
+Cator is a simple, emacs-like and joe-like text editor.
+It can also edit directories.
+)ABOUT");
 }
 
 void Main::OnBufferSave(SaveBufferEvent &event)
 {
-    _textArea->SaveFile();
+    if(_isDired)
+    {
+        auto linNum = _textArea->GetNumberOfLines();
+        for(auto i = 0; i < linNum; i++)
+        {
+            if(i >= _dirFileList.size())
+                break;
+            std::string line = _textArea->GetLineText(i).ToStdString();
+            /* First, check the file name. If it's different, delete the file. */
+            if(cator::tail(line, line.rfind(' ')) !=
+               cator::tail(_dirFileList[i], _dirFileList[i].rfind(' ')))
+            {
+                std::cout << cator::tail(line, 13) << " is different than "
+                          << cator::tail(_dirFileList[i], 13) << '\n';
+            }
+            /* Check for some type of change. Check first for file
+               permissions. */
+            if(auto pos = _dirFileList[i].find(line.substr(0, 10));
+                pos != 0)
+            {
+            }
+        }
+    }
+    else
+        _textArea->SaveFile();
 }
 
 void Main::OnFireEvent(wxCommandEvent &event)
@@ -957,7 +988,7 @@ void Main::OpenDir(wxCommandEvent &event)
         return;
 
     char buf[PATH_MAX];
-    FILE *ls = popen(cator::sprintf("/bin/ls %s", dlg.GetPath().ToStdString()).c_str(),
+    FILE *ls = popen(cator::sprintf("/bin/ls -l %s", dlg.GetPath().ToStdString()).c_str(),
         "r");
     if(ls == nullptr)
     {
@@ -968,9 +999,21 @@ void Main::OpenDir(wxCommandEvent &event)
 
     _textArea->SetFilename("");
     _textArea->Clear();
+    _dirFileList.clear();
+    _isDired = true;
+    bool isFirstLine = true;
 
     while(fgets(buf, sizeof(buf), ls) != nullptr)
     {
+        /* Skip the first line (length). */
+        if(isFirstLine)
+        {
+            isFirstLine = false;
+            continue;
+        }
         _textArea->WriteText(wxString(buf));
+        _dirFileList.push_back(std::string(buf, std::strlen(buf) - 1));
     }
+
+    _statusBar->SetStatusText(dlg.GetPath(), 0);
 }
