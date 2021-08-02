@@ -45,7 +45,12 @@ enum
     ID_UseSystemFontToggle,
     ID_ForwardSearch,
     ID_Describe,
-    ID_License
+    ID_License,
+    ID_Open,
+    ID_OpenDir,
+    ID_Copy,
+    ID_Paste,
+    ID_Cut,
 };
 
 #endif /* CATOR_MAIN_HPP */

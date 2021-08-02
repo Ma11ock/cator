@@ -30,7 +30,7 @@ EVT_SAVBUF(Main::OnBufferSave)
 END_EVENT_TABLE()
 
 Main::Main()
-: wxFrame(nullptr, wxID_ANY, "Cator", {}, {800, 600})
+: wxFrame(nullptr, wxID_ANY, "Cato", {}, {800, 600})
 {
     /* Create the top (global) menu bar. */
     auto menuBar = new wxMenuBar;
@@ -63,9 +63,28 @@ Main::Main()
     help->Append(ID_License, wxT("&License"));
     menuBar->Append(help, wxT("&Help"));
 
-    _textArea = new wxRichTextCtrl(this, wxID_ANY);
 
     SetMenuBar(menuBar);
+
+    auto toolBar = new wxToolBar(this, wxID_ANY, wxDefaultPosition,
+                                 wxDefaultSize, wxTB_HORIZONTAL | wxTB_NOICONS);
+    toolBar->AddTool(ID_Cut, wxT("Cut"), wxNullBitmap);
+    toolBar->AddTool(ID_VisitFile, wxT("New File"), wxNullBitmap);
+    toolBar->AddTool(ID_Open, wxT("Open"), wxNullBitmap);
+    toolBar->AddTool(ID_OpenDir, wxT("Open Directory"), wxNullBitmap);
+
+    toolBar->AddTool(ID_Cut, wxT("Cut"), wxNullBitmap);
+    toolBar->AddTool(ID_Copy, wxT("Copy"), wxNullBitmap);
+    toolBar->AddTool(ID_Paste, wxT("Paste"), wxNullBitmap);
+    toolBar->AddTool(ID_Undo, wxT("Undo"), wxNullBitmap);
+    toolBar->AddTool(ID_Redo, wxT("Redo"), wxNullBitmap);
+
+    toolBar->AddTool(wxID_EXIT, wxT("Quit"), wxNullBitmap);
+
+
+    SetToolBar(toolBar);
+
+    _textArea = new wxRichTextCtrl(this, wxID_ANY);
 }
 
 void Main::OnNew(wxCommandEvent &event)
@@ -154,7 +173,11 @@ void Main::ForwardSearch(wxCommandEvent &event)
 void Main::Describe(wxCommandEvent &event)
 {
     wxMessageBox(R"HELP(
-
+This is the directory editor.
+You can delete a file by erasing its line in this buffer.
+You can change a file's permissions by altering its the first 10 characters.
+You can change the owner and creator by altering its entry.
+Ditto with the file's name.
 )HELP");
 }
 

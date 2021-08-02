@@ -52,6 +52,7 @@ target_compile_definitions(${BINARY} PUBLIC
   __WXGTK__=1)
 
 target_link_libraries(${BINARY} PUBLIC
+  wx_gtk3u_ribbon-3.0
   wx_gtk3u_richtext-3.0
   wx_gtk3u_xrc-3.0
   wx_gtk3u_webview-3.0
