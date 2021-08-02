@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -50,6 +51,24 @@ namespace cator
                                 const std::string &formatString, Args&&... args)
     {
         return std::snprintf(result, size, formatString.c_str(),
+                             cator::cast::cast(std::forward<Args>(args))...);
+    }
+
+    /* ASPrint implementation. */
+    template <typename... Args>
+    inline std::size_t asprintf(char *&result, const std::string &formatString,
+                                Args&&... args)
+    {
+        std::size_t strlen = static_cast<std::size_t>(
+            std::snprintf(nullptr, 0, formatString.c_str(),
+                          cator::cast::cast(std::forward<Args>(args))...));
+
+        if(strlen == 0)
+            return 0;
+
+        result = new char[++strlen];
+
+        return std::snprintf(result, strlen, formatString.c_str(),
                              cator::cast::cast(std::forward<Args>(args))...);
     }
 }
