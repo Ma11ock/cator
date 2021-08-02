@@ -103,7 +103,7 @@ void Main::InsertFile(wxCommandEvent &event)
 void Main::VisitNewFile(wxCommandEvent &event)
 {
     wxFileDialog openFileDialog(this, wxT("Choose a file"), "", "",
-                                "*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+                                "*", wxFD_SAVE);
 
     if(openFileDialog.ShowModal() == wxID_CANCEL)
         return;
