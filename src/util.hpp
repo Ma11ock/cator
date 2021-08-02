@@ -84,4 +84,29 @@ namespace cator
             return std::string(source);
         return std::string(source.substr(source.size() - length));
     }
+
+    /* Get a string form the last char until char c.
+       If c is not found in the string, return str. */
+    inline std::string tailUntil(std::string_view source, char c)
+    {
+        auto occurance = source.find_last_of(c);
+        if(occurance == std::string_view::npos)
+            return std::string(source);
+
+        return cator::tail(source, source.size() - occurance - 1);
+    }
+
+    /* Errno and errstr. */
+    inline std::string errStr()
+    {
+        return cator::sprintf("errno: %d, errstr: %s", errno, std::strerror(errno));
+    }
+
+     /* error_code and errstr. */
+    inline std::string errStr(std::error_code errc)
+    {
+        return cator::sprintf("Error code: %d, string: \"%s\"",
+                              errc.value(), errc.message());
+    }
+
 }

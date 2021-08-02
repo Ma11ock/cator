@@ -15,6 +15,7 @@ extern "C"
 {
 #include <linux/limits.h>
 #include <sys/stat.h>
+#include <unistd.h>
 }
 
 using namespace std::string_literals;
@@ -157,13 +158,29 @@ void Main::OnBufferSave(SaveBufferEvent &event)
         {
             if(i >= _dirFileList.size())
                 break;
+
             std::string line = _textArea->GetLineText(i).ToStdString();
+            std::string fileName = cator::tailUntil(line, ' ');
+            if(fileName == line)
+                continue;
             /* First, check the file name. If it's different, delete the file. */
-            if(cator::tail(line, line.rfind(' ')) !=
-               cator::tail(_dirFileList[i], _dirFileList[i].rfind(' ')))
+            if(auto oldFileName = cator::tailUntil(_dirFileList[i], ' ');
+                oldFileName != fileName)
             {
-                std::cout << cator::tail(line, 13) << " is different than "
-                          << cator::tail(_dirFileList[i], 13) << '\n';
+                fs::path newPath = fs::path(get_current_dir_name()) / fileName;
+                fs::path oldPath = fs::path(get_current_dir_name()) / oldFileName;
+                std::error_code er;
+                if(fs::rename(oldPath, newPath, er);
+                   er != std::error_code())
+                {
+                    auto errMsg = cator::sprintf("Could not rename file \"%s\" "
+                                                 ": %s",
+                                                 oldPath.generic_string(),
+                                                 cator::errStr(er));
+                    wxMessageBox(wxString(errMsg), "File Rename Error",
+                                 wxICON_ERROR);
+                    std::cerr << "File rename error: " << errMsg << '\n';
+                }
             }
             /* Check for some type of change. Check first for file
                permissions. */
