@@ -163,12 +163,12 @@ void Main::OnBufferSave(SaveBufferEvent &event)
             std::string fileName = cator::tailUntil(line, ' ');
             if(fileName == line)
                 continue;
+            auto oldFileName = cator::tailUntil(_dirFileList[i], ' ');
+            fs::path oldPath = fs::path(get_current_dir_name()) / oldFileName;
             /* First, check the file name. If it's different, delete the file. */
-            if(auto oldFileName = cator::tailUntil(_dirFileList[i], ' ');
-                oldFileName != fileName)
+            if(oldFileName != fileName)
             {
                 fs::path newPath = fs::path(get_current_dir_name()) / fileName;
-                fs::path oldPath = fs::path(get_current_dir_name()) / oldFileName;
                 std::error_code er;
                 if(fs::rename(oldPath, newPath, er);
                    er != std::error_code())
@@ -182,12 +182,74 @@ void Main::OnBufferSave(SaveBufferEvent &event)
                     std::cerr << "File rename error: " << errMsg << '\n';
                 }
             }
-            /* Check for some type of change. Check first for file
-               permissions. */
-            if(auto pos = _dirFileList[i].find(line.substr(0, 10));
-                pos != 0)
+            /* Check for change in file permissions. */
+            for(auto j = 1; j < 10; j++)
             {
+                auto add = fs::perm_options::add;
+                std::error_code err;
+                auto oldPerms = _dirFileList[i];
+                if(line[j] != oldPerms[j])
+                {
+                    switch(line[j])
+                    {
+                    case 'r':
+                        if(j < 3)
+                            fs::permissions(oldPath, fs::perms::owner_read,
+                                            add, err);
+                        else if(j < 6)
+                            fs::permissions(oldPath, fs::perms::group_read,
+                                            add, err);
+                        else
+                            fs::permissions(oldPath, fs::perms::others_read,
+                                            add, err);
+                        break;
+
+                    case 'w':
+                        if(j < 3)
+                            fs::permissions(oldPath, fs::perms::owner_write,
+                                            add, err);
+                        else if(j < 6)
+                            fs::permissions(oldPath, fs::perms::group_write,
+                                            add, err);
+                        else
+                            fs::permissions(oldPath, fs::perms::others_write,
+                                            add, err);
+                        break;
+
+
+                    case 'x':
+                        if(j < 3)
+                            fs::permissions(oldPath, fs::perms::owner_exec,
+                                            add, err);
+                        else if(j < 6)
+                            fs::permissions(oldPath, fs::perms::group_exec,
+                                            add, err);
+                        else
+                            fs::permissions(oldPath, fs::perms::others_exec,
+                                            add, err);
+                        break;
+
+
+                    default:
+                        wxMessageBox(wxString(cator::sprintf("Could not understand the meaning of %c",
+                                                             line[i])),
+                                     "Bad argument for file permissions",
+                                     wxICON_ERROR);
+                        break;
+                    }
+                    if(err != std::error_code())
+                    {
+                        auto errMsg = cator::sprintf("Could not change file permissions for \"%s\" "
+                                                     ": %s",
+                                                     oldPath.generic_string(),
+                                                     cator::errStr(err));
+                        wxMessageBox(wxString(errMsg), "File Permission Error",
+                                     wxICON_ERROR);
+                        std::cerr << "File Permission error: " << errMsg << '\n';
+                    }
+                }
             }
+            /* Check for change in file owner. */
         }
     }
     else
@@ -1034,3 +1096,4 @@ void Main::OpenDir(wxCommandEvent &event)
 
     _statusBar->SetStatusText(dlg.GetPath(), 0);
 }
+
