@@ -63,7 +63,8 @@ target_link_libraries(${BINARY} PUBLIC
   wx_gtk3u_core-3.0
   wx_baseu_xml-3.0
   wx_baseu_net-3.0
-  wx_baseu-3.0)
+  wx_baseu-3.0
+  png)
 
 # Libm
 target_link_libraries(${BINARY} PUBLIC m)

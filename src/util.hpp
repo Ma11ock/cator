@@ -116,4 +116,11 @@ namespace cator
                               errc.value(), errc.message());
     }
 
+    inline bool strEnd(std::string_view str, std::string_view suffix)
+    {
+        if(str.size() < suffix.size())
+            return false;
+
+        return (str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0);
+    }
 }

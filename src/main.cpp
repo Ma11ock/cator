@@ -132,6 +132,8 @@ Main::Main()
         _userName = pw->pw_name;
     else
         _userName = "Unknown";
+
+    wxInitAllImageHandlers();
 }
 
 void Main::OnNew(wxCommandEvent &event)
@@ -258,7 +260,8 @@ void Main::OnBufferSave(SaveBufferEvent &event)
                 }
             }
             /* Check for change in file owner. */
-            if(line.substr(13, _userName.size()) != _userName && _userName != "Unkown")
+            if(line.substr(13, _userName.size()) != _userName &&
+               _userName != "Unkown")
             {
                 std::string newUser = cator::substrUntil(line, 13, ' ');
                 passwd *p;
@@ -1123,14 +1126,25 @@ void Main::OpenDir(wxCommandEvent &event)
 
     while(fgets(buf, sizeof(buf), ls) != nullptr)
     {
+        /* Ignore \n at the end. */
+        std::string trunc(buf, strlen(buf) - 1);
+        std::string fileName = cator::tailUntil(trunc,' ');
         /* Skip the first line (length). */
         if(isFirstLine)
         {
             isFirstLine = false;
             continue;
         }
+
+        if(cator::strEnd(fileName, ".png"))
+        {
+            if(!_textArea->WriteImage(wxString(fileName), wxBITMAP_TYPE_PNG))
+            {
+                std::cout << "Could not write image " << fileName << '\n';
+            }
+        }
         _textArea->WriteText(wxString(buf));
-        _dirFileList.push_back(std::string(buf, std::strlen(buf) - 1));
+        _dirFileList.push_back(trunc);
     }
 
     _statusBar->SetStatusText(dlg.GetPath(), 0);
