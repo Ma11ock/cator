@@ -16,6 +16,7 @@ extern "C"
 #include <linux/limits.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <pwd.h>
 }
 
 using namespace std::string_literals;
@@ -124,6 +125,13 @@ Main::Main()
     _textArea->Bind(wxEVT_RICHTEXT_SELECTION_CHANGED, &Main::KeyDown, this);
 
     _isDired = false;
+
+    _userID = geteuid();
+    passwd *pw = getpwuid(_userID);
+    if(pw)
+        _userName = pw->pw_name;
+    else
+        _userName = "Unknown";
 }
 
 void Main::OnNew(wxCommandEvent &event)
@@ -250,6 +258,37 @@ void Main::OnBufferSave(SaveBufferEvent &event)
                 }
             }
             /* Check for change in file owner. */
+            if(line.substr(13, _userName.size()) != _userName && _userName != "Unkown")
+            {
+                std::string newUser = cator::substrUntil(line, 13, ' ');
+                passwd *p;
+                p = getpwnam(newUser.c_str());
+                if(p == nullptr)
+                {
+                    auto errMsg = cator::sprintf("User %s does not exist.",
+                                                 newUser);
+                    wxMessageBox(wxString(errMsg), "Invalid User",
+                                 wxICON_ERROR);
+                    std::cerr << "Invalid User: " << errMsg << '\n';
+                }
+
+                uid_t newUserID = p->pw_uid;
+                std::cout << "The new user is " << newUser << " with id " << newUserID << '\n';
+
+                if(chown(oldPath.generic_string().c_str(), newUserID, 0) != 0)
+                {
+                    auto errMsg = cator::sprintf("Could not change onwer for \"%s\" "
+                                                 "from %s to %s: %s",
+                                                 oldPath.generic_string(),
+                                                 _userName,
+                                                 newUser,
+                                                 cator::errStr());
+                    wxMessageBox(wxString(errMsg), "File Chown Error",
+                                 wxICON_ERROR);
+                    std::cerr << "File Chown error: " << errMsg << '\n';
+                }
+            }
+
         }
     }
     else

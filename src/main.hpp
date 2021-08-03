@@ -17,6 +17,8 @@ private:
     wxRichTextCtrl *_textArea;
     wxStatusBar *_statusBar;
     bool _isDired;
+    std::string _userName;
+    uid_t _userID;
 
     void OnNew(wxCommandEvent &event);
     void OnQuit(wxCommandEvent &event);

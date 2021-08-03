@@ -96,6 +96,13 @@ namespace cator
         return cator::tail(source, source.size() - occurance - 1);
     }
 
+    inline std::string substrUntil(std::string_view str,
+                                   std::string_view::size_type n, char c)
+    {
+        auto sub = str.substr(n);
+        return std::string(sub.substr(0, sub.find_first_of(' ')));
+    }
+
     /* Errno and errstr. */
     inline std::string errStr()
     {
