@@ -39,6 +39,10 @@ private:
     void Cut(wxCommandEvent &event);
     void Open(wxCommandEvent &event);
     void OpenDir(wxCommandEvent &event);
+
+    void ChangeFilePermission();
+    void ChangeFileOwner();
+    void MaybeDeleteFile();
 public:
     Main();
     ~Main() = default;

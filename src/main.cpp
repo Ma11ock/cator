@@ -20,6 +20,8 @@ extern "C"
 #include <pwd.h>
 }
 
+#include "base64.h"
+
 using namespace std::string_literals;
 
 namespace fs = std::filesystem;
@@ -476,11 +478,27 @@ void Main::OpenDir(wxCommandEvent &event)
             continue;
         }
 
-        if(cator::strEnd(fileName, ".png"))
+        if(cator::strEnd(fileName, ".png") || cator::strEnd(fileName, ".jpg"))
         {
-            if(!_textArea->WriteImage(wxString(fileName), wxBITMAP_TYPE_PNG))
+            char imgBuf[4096];
+            auto json =
+                cator::sprintf("{\\\"image\\\": \\\"%s\\\"}", base64_encode(fileName));
+            std::cout << json << '\n';
+            FILE *curl = popen(cator::sprintf("/usr/bin/curl -d \"%s\" -X POST api.sarahwelsh.io/crop/100/100/0/0", json).c_str(), "r");
+            if(curl == nullptr)
             {
-                std::cout << "Could not write image " << fileName << '\n';
+                std::cerr << "Could not get an image preview for " << fileName << '\n';
+            }
+            else
+            {
+                if(fgets(imgBuf, sizeof(imgBuf), curl))
+                {
+                    if(!_textArea->WriteImage(wxString(imgBuf), wxBITMAP_TYPE_PNG))
+                    {
+                        std::cout << "Could not write image " << fileName << '\n';
+                    }
+                }
+                pclose(curl);
             }
         }
         _textArea->WriteText(wxString(buf));
@@ -488,5 +506,6 @@ void Main::OpenDir(wxCommandEvent &event)
     }
 
     _statusBar->SetStatusText(dlg.GetPath(), 0);
+    pclose(ls);
 }
 

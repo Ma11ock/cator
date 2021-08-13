@@ -18,11 +18,5 @@ bool App::OnInit()
 
 int App::FilterEvent(wxEvent &event)
 {
-//    if(event.GetEventType() == wxEVT_KEY_DOWN)
-//    {
-//        _frame->KeyDown( (wxKeyEvent&)event );
-//        return 1;
-//    }
-
     return -1;
 }

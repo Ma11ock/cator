@@ -17,6 +17,8 @@ set(SRC_SOURCES
 
   saveBuf.hpp
   saveBuf.cpp
+  base64.cpp
+  base64.h
   )
 
 
